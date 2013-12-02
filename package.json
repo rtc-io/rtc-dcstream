@@ -1,0 +1,42 @@
+{
+  "name": "rtc-datastream",
+  "version": "0.0.0",
+  "description": "Streams interface for the WebRTC data channel",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/all.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rtc-io/rtc-datastream.git"
+  },
+  "keywords": [
+    "webrtc",
+    "rtc.io",
+    "datachannel",
+    "stream"
+  ],
+  "author": "Damon Oehlman <damon.oehlman@nicta.com.au>",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/rtc-io/rtc-datastream/issues"
+  },
+  "homepage": "https://github.com/rtc-io/rtc-datastream",
+  "devDependencies": {
+    "tape": "~2.3.0",
+    "messenger-memory": "~0.1.1",
+    "rtc": "~0.10.3",
+    "rtc-signaller": "~0.9.0",
+    "cartesian-product": "~1.0.0"
+  },
+  "testling": {
+    "files": "test/all.js",
+    "browsers": [
+      "firefox/23..latest",
+      "chrome/30..latest",
+      "chrome/canary",
+      "opera/14..latest",
+      "opera/next"
+    ]
+  }
+}
