@@ -27,7 +27,8 @@
     "messenger-memory": "~0.1.1",
     "rtc": "~0.10.3",
     "rtc-signaller": "~0.9.0",
-    "cartesian-product": "~1.0.0"
+    "cartesian-product": "~1.0.0",
+    "peerpair": "~0.2.1"
   },
   "testling": {
     "files": "test/all.js",
