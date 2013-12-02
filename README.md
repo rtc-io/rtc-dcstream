@@ -1,6 +1,13 @@
 # rtc-datastream
 
-Node streams2 interface for working with WebRTC data channels.
+Node streams2 interface for working with WebRTC data channels. This stream
+implementation will cater for current data size limits in the WebRTC
+data channels.
+
+It is, however, a work in progress.  While this library is under development
+perhaps check out one of these alternative implementations:
+
+- [rtc-data-stream](https://github.com/kumavis/rtc-data-stream)
 
 ## License(s)
 
