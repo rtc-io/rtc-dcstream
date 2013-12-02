@@ -4,6 +4,12 @@
 var stream = require('stream');
 var util = require('util');
 
+/**
+  # rtc-datastream
+
+  Node streams2 interface for working with WebRTC data channels.
+**/
+
 function RTCDataStream(channel) {
   if (! (this instanceof RTCDataStream)) {
     return new RTCDataStream(channel);
