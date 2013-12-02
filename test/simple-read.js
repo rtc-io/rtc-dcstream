@@ -20,3 +20,12 @@ test('create a data stream on dc:1', function(t) {
   t.ok(stream instanceof Duplex, 'created stream object');
 });
 
+test('can read from the stream', function(t) {
+  t.plan(1);
+  stream.on('data', function handleData(buffer) {
+    t.equal(buffer.toString(), 'hello');
+  });
+
+  dcs[0].send('hello');
+});
+
