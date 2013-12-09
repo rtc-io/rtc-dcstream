@@ -5,7 +5,7 @@ var stream = require('stream');
 var util = require('util');
 
 /**
-  # rtc-datastream
+  # rtc-channelstream
 
   Node streams2 interface for working with WebRTC data channels. This stream
   implementation will cater for current data size limits in the WebRTC
@@ -18,9 +18,9 @@ var util = require('util');
 
 **/
 
-function RTCDataStream(channel) {
-  if (! (this instanceof RTCDataStream)) {
-    return new RTCDataStream(channel);
+function RTCChannelStream(channel) {
+  if (! (this instanceof RTCChannelStream)) {
+    return new RTCChannelStream(channel);
   }
 
   stream.Duplex.call(this);
@@ -28,16 +28,16 @@ function RTCDataStream(channel) {
   channel.addEventListener('close', this._handleClose.bind(this));
 }
 
-module.exports = RTCDataStream;
-util.inherits(RTCDataStream, stream.Duplex);
+module.exports = RTCChannelStream;
+util.inherits(RTCChannelStream, stream.Duplex);
 
-RTCDataStream.prototype._handleClose = function(evt) {
+RTCChannelStream.prototype._handleClose = function(evt) {
   console.log('stream closed');
 };
 
-RTCDataStream.prototype._handleMessage = function(evt) {
+RTCChannelStream.prototype._handleMessage = function(evt) {
   this.push(evt.data);
 };
 
-RTCDataStream.prototype._read = function(n) {
+RTCChannelStream.prototype._read = function(n) {
 };
