@@ -4,8 +4,19 @@ Node streams2 interface for working with WebRTC data channels. This stream
 implementation will cater for current data size limits in the WebRTC
 data channels.
 
-It is, however, a work in progress.  While this library is under development
-perhaps check out one of these alternative implementations:
+
+[![NPM](https://nodei.co/npm/rtc-channelstream.png)](https://nodei.co/npm/rtc-channelstream/)
+
+
+[![browser support](https://ci.testling.com/rtc-io/rtc-channelstream.png)](https://ci.testling.com/rtc-io/rtc-channelstream)
+
+[![unstable](http://hughsk.github.io/stability-badges/dist/unstable.svg)](http://github.com/hughsk/stability-badges)
+
+## NOTE: Work in Progress
+
+This module is currently an experimental work in progress, so I'd recommend
+checking out one of the alternative implementation of data channel -> node
+stream implementations:
 
 - [rtc-data-stream](https://github.com/kumavis/rtc-data-stream)
 

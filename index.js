@@ -11,8 +11,11 @@ var util = require('util');
   implementation will cater for current data size limits in the WebRTC
   data channels.
 
-  It is, however, a work in progress.  While this library is under development
-  perhaps check out one of these alternative implementations:
+  ## NOTE: Work in Progress
+
+  This module is currently an experimental work in progress, so I'd recommend
+  checking out one of the alternative implementation of data channel -> node
+  stream implementations:
 
   - [rtc-data-stream](https://github.com/kumavis/rtc-data-stream)
 
