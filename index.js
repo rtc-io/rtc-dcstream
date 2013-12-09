@@ -51,13 +51,21 @@ module.exports = RTCChannelStream;
 util.inherits(RTCChannelStream, stream.Duplex);
 
 RTCChannelStream.prototype._read = function(n) {
-  console.log('read requested for n bytes:', n);
+  var ready = true;
+
+  // if we have no data queued, then wait until we have been told we
+  // do as _read will not be called again until we have pushed something
+  if (this._rq.length === 0) {
+    return this.once('readable', this._read.bind(this, n));
+  }
 
   // TODO: honour the request for a particular number of bytes
   // this.push(evt.data);
-  if (this._rq.length > 0) {
-    this.push(this._rq.shift());
+  while (ready && this._rq.length > 0) {
+    ready = this.push(this._rq.shift());
   }
+
+  return ready;
 };
 
 RTCChannelStream.prototype._write = function(data) {
@@ -82,7 +90,6 @@ function handleChannelClose(evt) {
 }
 
 function handleChannelMessage(evt) {
-  console.log('got data, emitting readable');
   this._rq.push(evt.data);
   this.emit('readable');
 }

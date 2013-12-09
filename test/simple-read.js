@@ -21,22 +21,38 @@ test('create a data stream on dc:1', function(t) {
   t.ok(stream instanceof Duplex, 'created stream object');
 });
 
+test('can read (non flowing mode)', function(t) {
+  t.plan(1);
+
+  function readData() {
+    var data = stream.read();
+
+    if (data) {
+      stream.removeListener('readable', readData);
+      t.equal(data.toString(), 'hello1');
+    }
+  }
+
+  stream.on('readable', readData);
+  dcs[0].send('hello1');
+});
+
 test('can read from the stream', function(t) {
   t.plan(1);
 
   stream.once('data', function handleData(buffer) {
-    t.equal(buffer.toString(), 'hello');
+    t.equal(buffer.toString(), 'hello2');
   });
 
-  dcs[0].send('hello');
+  dcs[0].send('hello2');
 });
 
 test('can read through', function(t) {
   t.plan(1);
 
   stream.pipe(through()).once('data', function(buffer) {
-    t.equal(buffer.toString(), 'hello2');
+    t.equal(buffer.toString(), 'hello3');
   });
 
-  dcs[0].send('hello2');
+  dcs[0].send('hello3');
 });
