@@ -15,27 +15,19 @@ test('initialize channels', function(t) {
   });
 });
 
-test('create a data stream on dc:1', function(t) {
+test('create a data stream on dc:0', function(t) {
   t.plan(1);
-  stream = channelstream(dcs[1]);
+  stream = channelstream(dcs[0]);
   t.ok(stream instanceof Duplex, 'created stream object');
 });
 
-test('can read from the stream', function(t) {
-  t.plan(1);
-  stream.once('data', function handleData(buffer) {
-    t.equal(buffer.toString(), 'hello');
+test('can write to the stream', function(t) {
+  t.plan(2);
+
+  dcs[1].addEventListener('message', function(evt) {
+    t.ok(evt && evt.data);
+    t.equal(evt.data, 'hello', 'got expected message');
   });
 
-  dcs[0].send('hello');
-});
-
-test('can read through', function(t) {
-  t.plan(1);
-
-  stream.pipe(through()).once('data', function(buffer) {
-    t.equal(buffer.toString(), 'hello2');
-  });
-
-  dcs[0].send('hello2');
+  stream.write('hello');
 });
