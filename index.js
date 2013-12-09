@@ -23,7 +23,13 @@ function RTCChannelStream(channel) {
     return new RTCChannelStream(channel);
   }
 
+  // super
   stream.Duplex.call(this);
+
+  // save a reference to the channel
+  this.channel = channel;
+
+  // attach channel listeners
   channel.addEventListener('message', this._handleMessage.bind(this));
   channel.addEventListener('close', this._handleClose.bind(this));
 }
@@ -40,4 +46,8 @@ RTCChannelStream.prototype._handleMessage = function(evt) {
 };
 
 RTCChannelStream.prototype._read = function(n) {
+};
+
+RTCChannelStream.prototype._write = function(data) {
+  this.channel.send(data);
 };
