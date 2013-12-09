@@ -23,6 +23,7 @@ test('create a data stream on dc:1', function(t) {
 
 test('can read from the stream', function(t) {
   t.plan(1);
+
   stream.once('data', function handleData(buffer) {
     t.equal(buffer.toString(), 'hello');
   });

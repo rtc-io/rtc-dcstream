@@ -1,4 +1,4 @@
-// require('./simple-read');
+require('./simple-read');
 // require('./simple-write');
 // require('./simple-rw');
-require('./scuttlebutt-sync');
+// require('./scuttlebutt-sync');
