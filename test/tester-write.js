@@ -57,6 +57,7 @@ test('push through 5000 text updates', function(t) {
       // check the messages match
       checkParts();
       dcs[1].removeEventListener('message', handleMessage);
+      dcs[1].removeEventListener('close', handleClose);
     }
 
     if (received % progressInterval === 0) {
@@ -64,8 +65,13 @@ test('push through 5000 text updates', function(t) {
     }
   }
 
+  function handleClose(evt) {
+    t.fail('broke the datachannel - it closed');
+  }
+
   t.plan(12);
   dcs[1].addEventListener('message', handleMessage);
+  dcs[1].addEventListener('close', handleClose);
 
   tester.createRandomStream(function() {
     return LIPSUM;
@@ -106,6 +112,7 @@ test('push through 5000 buffer updates', function(t) {
       // check the messages match
       checkParts();
       dcs[1].removeEventListener('message', handleMessage);
+      dcs[1].removeEventListener('close', handleClose);
     }
 
     if (received % progressInterval === 0) {
@@ -113,8 +120,13 @@ test('push through 5000 buffer updates', function(t) {
     }
   }
 
+  function handleClose(evt) {
+    t.fail('broke the datachannel - it closed');
+  }
+
   t.plan(12);
   dcs[1].addEventListener('message', handleMessage);
+  dcs[1].addEventListener('close', handleClose);
 
   tester.createRandomStream(function() {
     return new Buffer([0xFF, 0xAA]);
