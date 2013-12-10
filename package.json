@@ -29,6 +29,8 @@
     "through": "~2.3.4",
     "scuttlebutt": "~5.6.8",
     "mocha": "~1.15.1",
-    "zuul": "~1.0.6"
+    "zuul": "~1.0.6",
+    "stream-spec": "~0.3.5",
+    "stream-tester": "0.0.5"
   }
 }
