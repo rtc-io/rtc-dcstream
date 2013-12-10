@@ -22,7 +22,7 @@ var util = require('util');
   ## Reference
 
   To be completed.
-
+  
 **/
 
 function RTCChannelStream(channel) {
