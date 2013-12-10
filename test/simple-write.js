@@ -53,6 +53,6 @@ test('can write a buffer to the stream', function(t) {
   }
 
   dcs[1].addEventListener('message', handleMessage);
-  console.log('writing new chunk, is buffer = ', chunk instanceof Buffer);
+  // console.log('writing new chunk, is buffer = ', chunk instanceof Buffer);
   stream.write(chunk);
 });
