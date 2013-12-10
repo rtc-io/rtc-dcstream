@@ -93,8 +93,14 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
 
   // if the channel is not open, then queue the write
   if (this.channel.readyState !== 'open') {
+    console.log('closed, need to buffer');
+
     // TODO: how to handle this situation?
     return this._wq.push(chunk);
+  }
+
+  if (this.channel.bufferedAmount > 0) {
+    console.log('channel buffering: ', this.channel.bufferedAmount);
   }
 
   // if we have a buffer convert into a Uint8Array
@@ -103,7 +109,12 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
   }
   // otherwise, send as is
   else {
-    this.channel.send(chunk);
+    try {
+      this.channel.send(chunk);
+    }
+    catch (e) {
+      console.log('error sending text: ', e);
+    }
   }
 
   setTimeout(callback, 0);
@@ -112,6 +123,7 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
 /* event handlers */
 
 function handleChannelClose(evt) {
+  console.log('dc closed');
   this.emit('close');
 }
 
