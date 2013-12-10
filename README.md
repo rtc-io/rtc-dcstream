@@ -1,15 +1,13 @@
-# rtc-channelstream
+# rtc-dcstream
 
 Node streams2 interface for working with WebRTC data channels. This stream
 implementation will cater for current data size limits in the WebRTC
 data channels.
 
 
-[![NPM](https://nodei.co/npm/rtc-channelstream.png)](https://nodei.co/npm/rtc-channelstream/)
+[![NPM](https://nodei.co/npm/rtc-dcstream.png)](https://nodei.co/npm/rtc-dcstream/)
 
-
-[![browser support](https://ci.testling.com/rtc-io/rtc-channelstream.png)](https://ci.testling.com/rtc-io/rtc-channelstream)
-
+[![Build Status](https://travis-ci.org/rtc-io/rtc-dcstream.png?branch=master)](https://travis-ci.org/rtc-io/rtc-dcstream)
 [![unstable](http://hughsk.github.io/stability-badges/dist/unstable.svg)](http://github.com/hughsk/stability-badges)
 
 ## NOTE: Work in Progress
@@ -19,6 +17,10 @@ checking out one of the alternative implementation of data channel -> node
 stream implementations:
 
 - [rtc-data-stream](https://github.com/kumavis/rtc-data-stream)
+
+## Reference
+
+To be completed.
 
 ## License(s)
 

@@ -5,7 +5,7 @@ var stream = require('stream');
 var util = require('util');
 
 /**
-  # rtc-channelstream
+  # rtc-dcstream
 
   Node streams2 interface for working with WebRTC data channels. This stream
   implementation will cater for current data size limits in the WebRTC
@@ -22,7 +22,7 @@ var util = require('util');
   ## Reference
 
   To be completed.
-  
+
 **/
 
 function RTCChannelStream(channel) {
