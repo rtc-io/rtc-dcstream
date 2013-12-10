@@ -19,6 +19,10 @@ var util = require('util');
 
   - [rtc-data-stream](https://github.com/kumavis/rtc-data-stream)
 
+  ## Reference
+
+  To be completed.
+
 **/
 
 function RTCChannelStream(channel) {
@@ -27,7 +31,10 @@ function RTCChannelStream(channel) {
   }
 
   // super
-  stream.Duplex.call(this);
+  stream.Duplex.call(this, {
+    decodeStrings: false,
+    objectMode: true
+  });
 
   // create the internal read and write queues
   this._rq = [];
@@ -52,6 +59,7 @@ util.inherits(RTCChannelStream, stream.Duplex);
 
 RTCChannelStream.prototype._read = function(n) {
   var ready = true;
+  var next;
 
   // if we have no data queued, then wait until we have been told we
   // do as _read will not be called again until we have pushed something
@@ -62,13 +70,22 @@ RTCChannelStream.prototype._read = function(n) {
   // TODO: honour the request for a particular number of bytes
   // this.push(evt.data);
   while (ready && this._rq.length > 0) {
-    ready = this.push(this._rq.shift());
+    // get the next chunk
+    next = this._rq.shift();
+
+    // if the next chunk is an array buffer, convert to a node buffer
+    if (next instanceof ArrayBuffer) {
+      this.push(new Buffer(new Uint8Array(next)));
+    }
+    else {
+      this.push(next);
+    }
   }
 
   return ready;
 };
 
-RTCChannelStream.prototype._write = function(data) {
+RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
   // if we don't have a channel, abort
   if (! this.channel) {
     return;
@@ -76,11 +93,20 @@ RTCChannelStream.prototype._write = function(data) {
 
   // if the channel is not open, then queue the write
   if (this.channel.readyState !== 'open') {
-    return this._wq.push(data);
+    // TODO: how to handle this situation?
+    return this._wq.push(chunk);
   }
 
-  // if we are good to go, then send the data
-  this.channel.send(data);
+  // if we have a buffer convert into a Uint8Array
+  if (chunk instanceof Buffer) {
+    this.channel.send(new Uint8Array(chunk));
+  }
+  // otherwise, send as is
+  else {
+    this.channel.send(chunk);
+  }
+
+  setTimeout(callback, 0);
 };
 
 /* event handlers */

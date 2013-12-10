@@ -56,3 +56,17 @@ test('can read through', function(t) {
 
   dcs[0].send('hello3');
 });
+
+test('can read binary data', function(t) {
+  t.plan(4);
+
+  stream.once('data', function handleData(buffer) {
+    // validate that the buffer is a buffer instance
+    t.ok(buffer instanceof Buffer, 'got a Buffer instance');
+    t.equal(buffer.length, 2, 'buffer is expected length')
+    t.equal(buffer[0], 0xFF);
+    t.equal(buffer[1], 0xAA);
+  });
+
+  dcs[0].send(new Uint8Array([0xFF, 0xAA]));
+});

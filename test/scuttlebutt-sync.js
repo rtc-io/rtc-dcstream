@@ -44,11 +44,12 @@ test('create model:1', function(t) {
 });
 
 test('update model:0, observe model:1 change', function(t) {
-  t.plan(1);
+  t.plan(2);
 
   models[1].on('update', function() {
-    console.log(arguments);
+    t.equal(models[1].get('name'), 'Bob', 'model 1 has synced (name == Bob)');
   });
 
+  t.equal(models[1].get('name'), undefined, 'model 1 has no name');
   models[0].set('name', 'Bob');
 });

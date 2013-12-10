@@ -45,3 +45,16 @@ test('can write to stream:1 and read through stream:0', function(t) {
 
   streams[1].write('ehlo');
 });
+
+test('can write buffer to stream:1 and read through stream:0', function(t) {
+  t.plan(4);
+
+  streams[0].once('data', function(buffer) {
+    t.ok(buffer instanceof Buffer, 'got a Buffer instance');
+    t.equal(buffer.length, 2, 'got 2 length buffer');
+    t.equal(buffer[0], 0xFF);
+    t.equal(buffer[1], 0xAA);
+  });
+
+  streams[1].write(new Buffer([0xFF, 0xAA]));
+});
