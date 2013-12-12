@@ -3,6 +3,7 @@
 
 var stream = require('stream');
 var util = require('util');
+var closingStates = ['closing', 'closed'];
 
 /**
   # rtc-dcstream
@@ -38,6 +39,7 @@ function RTCChannelStream(channel) {
 
   // create the internal read and write queues
   this._rq = [];
+  this._wq = [];
 
   // save a reference to the channel
   this.channel = channel;
@@ -85,9 +87,17 @@ RTCChannelStream.prototype._read = function(n) {
 };
 
 RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
-  // if we don't have a channel, abort
-  if (! this.channel) {
+  var closed = (! this.channel) ||
+    closingStates.indexOf(this.channel.readyState) >= 0;
+
+  // if closed then abort
+  if (closed) {
     return;
+  }
+
+  // if we are connecting, then wait
+  if (this._wq.length || this.channel.readyState === 'connecting') {
+    return this._wq.push([ chunk, encoding, callback ]);
   }
 
   if (this.channel.bufferedAmount > 0) {
@@ -124,4 +134,34 @@ function handleChannelMessage(evt) {
 }
 
 function handleChannelOpen(evt) {
+
+  var peer = this;
+
+  function sendNext(args) {
+    var callback;
+
+    // if we have no args, then abort
+    if (! args) {
+      return;
+    }
+
+    // save the callback
+    callback = args[2];
+
+    // replace with a new callback
+    args[2] = function() {
+      sendNext(peer._wq.shift());
+
+      // trigger the callback
+      if (typeof callback == 'function') {
+        callback();
+      }
+    };
+
+    peer._write.apply(peer, args);
+  }
+
+  // send the queued messages
+  console.log('channel open, sending queued messages');
+  sendNext(this._wq.shift());
 }
