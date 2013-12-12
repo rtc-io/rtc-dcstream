@@ -32,5 +32,8 @@
     "zuul": "~1.0.6",
     "stream-spec": "~0.3.5",
     "stream-tester": "0.0.5"
+  },
+  "dependencies": {
+    "cog": "~0.4.1"
   }
 }

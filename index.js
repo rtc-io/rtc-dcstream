@@ -1,6 +1,7 @@
 /* jshint node: true */
 'use strict';
 
+var debug = require('cog/logger')('rtc-dcstream');
 var stream = require('stream');
 var util = require('util');
 var closingStates = ['closing', 'closed'];
@@ -97,11 +98,12 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
 
   // if we are connecting, then wait
   if (this._wq.length || this.channel.readyState === 'connecting') {
+    debug('buffering write');
     return this._wq.push([ chunk, encoding, callback ]);
   }
 
   if (this.channel.bufferedAmount > 0) {
-    // console.log('channel buffering: ', this.channel.bufferedAmount);
+    debug('channel buffering: ', this.channel.bufferedAmount);
   }
 
   // if we have a buffer convert into a Uint8Array
@@ -114,7 +116,7 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
       this.channel.send(chunk);
     }
     catch (e) {
-      console.log('error sending text: ', e);
+      debug('error sending text: ', e);
     }
   }
 
@@ -124,7 +126,7 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
 /* event handlers */
 
 function handleChannelClose(evt) {
-  console.log('dc closed');
+  debug('dc closed');
   this.emit('close');
 }
 
@@ -163,6 +165,6 @@ function handleChannelOpen(evt) {
   }
 
   // send the queued messages
-  // console.log('channel open, sending queued messages', queue);
+  debug('channel open, sending queued messages', queue);
   sendNext(queue.shift());
 }
