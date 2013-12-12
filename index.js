@@ -101,7 +101,7 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
   }
 
   if (this.channel.bufferedAmount > 0) {
-    console.log('channel buffering: ', this.channel.bufferedAmount);
+    // console.log('channel buffering: ', this.channel.bufferedAmount);
   }
 
   // if we have a buffer convert into a Uint8Array
@@ -136,13 +136,14 @@ function handleChannelMessage(evt) {
 function handleChannelOpen(evt) {
 
   var peer = this;
+  var queue = this._wq;
 
   function sendNext(args) {
     var callback;
 
     // if we have no args, then abort
     if (! args) {
-      return;
+      return queue.length ? sendNext(queue.shift()) : null;
     }
 
     // save the callback
@@ -150,7 +151,7 @@ function handleChannelOpen(evt) {
 
     // replace with a new callback
     args[2] = function() {
-      sendNext(peer._wq.shift());
+      sendNext(queue.shift());
 
       // trigger the callback
       if (typeof callback == 'function') {
@@ -162,6 +163,6 @@ function handleChannelOpen(evt) {
   }
 
   // send the queued messages
-  console.log('channel open, sending queued messages');
-  sendNext(this._wq.shift());
+  // console.log('channel open, sending queued messages', queue);
+  sendNext(queue.shift());
 }
