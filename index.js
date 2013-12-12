@@ -38,7 +38,6 @@ function RTCChannelStream(channel) {
 
   // create the internal read and write queues
   this._rq = [];
-  this._wq = [];
 
   // save a reference to the channel
   this.channel = channel;
@@ -91,14 +90,6 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
     return;
   }
 
-  // if the channel is not open, then queue the write
-  if (this.channel.readyState !== 'open') {
-    console.log('closed, need to buffer');
-
-    // TODO: how to handle this situation?
-    return this._wq.push(chunk);
-  }
-
   if (this.channel.bufferedAmount > 0) {
     console.log('channel buffering: ', this.channel.bufferedAmount);
   }
@@ -133,5 +124,4 @@ function handleChannelMessage(evt) {
 }
 
 function handleChannelOpen(evt) {
-
 }
