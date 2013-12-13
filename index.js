@@ -130,7 +130,6 @@ function handleChannelClose(evt) {
 }
 
 function handleChannelMessage(evt) {
-  debug('got message: ', evt.data);
   this._rq.push(evt.data);
   this.emit('readable');
 }
