@@ -98,7 +98,6 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
 
   // if we are connecting, then wait
   if (this._wq.length || this.channel.readyState === 'connecting') {
-    debug('buffering write');
     return this._wq.push([ chunk, encoding, callback ]);
   }
 
@@ -131,6 +130,7 @@ function handleChannelClose(evt) {
 }
 
 function handleChannelMessage(evt) {
+  debug('got message: ', evt.data);
   this._rq.push(evt.data);
   this.emit('readable');
 }
@@ -165,6 +165,6 @@ function handleChannelOpen(evt) {
   }
 
   // send the queued messages
-  debug('channel open, sending queued messages', queue);
+  debug('channel open, sending queued ' + queue.length + ' messages');
   sendNext(queue.shift());
 }
