@@ -16,15 +16,6 @@ test('initialize channels', function(t) {
   });
 });
 
-test('set the data channels to arraybuffer binary mode', function(t) {
-  t.plan(2);
-  dcs[0].binaryType = 'arraybuffer';
-  dcs[1].binaryType = 'arraybuffer';
-
-  t.equal(dcs[0].binaryType, 'arraybuffer');
-  t.equal(dcs[1].binaryType, 'arraybuffer');
-});
-
 test('create a data stream on dc:0', function(t) {
   t.plan(1);
   stream = channelstream(dcs[0]);

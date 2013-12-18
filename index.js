@@ -45,6 +45,9 @@ function RTCChannelStream(channel) {
   // save a reference to the channel
   this.channel = channel;
 
+  // set the channel binaryType to arraybuffer
+  channel.binaryType = 'arraybuffer';
+
   // bind some local event handlers
   this._handleClose = handleChannelClose.bind(this);
   this._handleMessage = handleChannelMessage.bind(this);
