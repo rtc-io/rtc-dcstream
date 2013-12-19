@@ -5,6 +5,7 @@ var debug = require('cog/logger')('rtc-dcstream');
 var stream = require('stream');
 var util = require('util');
 var closingStates = ['closing', 'closed'];
+var ENDOFSTREAM = '::endofstream';
 
 /**
   # rtc-dcstream
@@ -57,6 +58,14 @@ function RTCChannelStream(channel) {
   channel.addEventListener('message', this._handleMessage);
   channel.addEventListener('close', this._handleClose);
   channel.addEventListener('open', this._handleOpen);
+
+  // listen for finish events on the stream
+  this.once('finish', function() {
+    // if the channel is still open send an EOF message
+    if (channel.readyState === 'open') {
+      channel.send(ENDOFSTREAM);
+    }
+  });
 }
 
 module.exports = RTCChannelStream;
@@ -133,7 +142,14 @@ function handleChannelClose(evt) {
 }
 
 function handleChannelMessage(evt) {
-  this._rq.push(evt.data);
+  var data = evt && evt.data;
+
+  // if we have an end of stream marker, end
+  if (typeof data == 'string' && data === ENDOFSTREAM) {
+    return this.emit('end');
+  }
+
+  this._rq.push(data);
   this.emit('readable');
 }
 
