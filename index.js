@@ -71,6 +71,15 @@ function RTCChannelStream(channel) {
 module.exports = RTCChannelStream;
 util.inherits(RTCChannelStream, stream.Duplex);
 
+RTCChannelStream.prototype._debindChannel = function() {
+  var channel = this.channel;
+
+  // remove the message listener
+  channel.removeEventListener('message', this._handleMessage);
+  channel.removeEventListener('close', this._handleClose);
+  channel.removeEventListener('open', this._handleOpen);
+};
+
 RTCChannelStream.prototype._read = function(n) {
   var ready = true;
   var next;
@@ -146,6 +155,10 @@ function handleChannelMessage(evt) {
 
   // if we have an end of stream marker, end
   if (typeof data == 'string' && data === ENDOFSTREAM) {
+    // remove the channel event bindings
+    this._debindChannel();
+
+    // emit the end
     return this.emit('end');
   }
 
