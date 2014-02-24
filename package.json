@@ -31,7 +31,10 @@
     "mocha": "~1.15.1",
     "zuul": "~1.5.4",
     "stream-spec": "~0.3.5",
-    "stream-tester": "0.0.5"
+    "stream-tester": "0.0.5",
+    "rtc-quickconnect": "~0.12.0",
+    "dropkick": "~0.1.1",
+    "filestream": "~0.5.0"
   },
   "dependencies": {
     "cog": "~0.5.1"
