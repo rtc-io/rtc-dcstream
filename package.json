@@ -24,12 +24,12 @@
   },
   "homepage": "https://github.com/rtc-io/rtc-dcstream",
   "devDependencies": {
-    "tape": "~2.3.0",
-    "peerpair": "~0.3.2",
+    "tape": "~2.5.0",
+    "peerpair": "~0.4.0",
     "through": "~2.3.4",
     "scuttlebutt": "~5.6.8",
     "mocha": "~1.15.1",
-    "zuul": "~1.0.6",
+    "zuul": "~1.5.4",
     "stream-spec": "~0.3.5",
     "stream-tester": "0.0.5"
   },
