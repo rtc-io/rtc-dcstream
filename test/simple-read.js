@@ -62,7 +62,7 @@ test('can read binary data', function(t) {
 
   stream.once('data', function handleData(buffer) {
     // validate that the buffer is a buffer instance
-    t.ok(buffer instanceof Buffer || buffer instanceof Uint8Array, 'got a Buffer instance');
+    t.ok(Buffer.isBuffer(buffer), 'got a Buffer instance');
     t.equal(buffer.length, 2, 'buffer is expected length')
     t.equal(buffer[0], 0xFF);
     t.equal(buffer[1], 0xAA);

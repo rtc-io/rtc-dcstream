@@ -50,7 +50,7 @@ test('can write buffer to stream:1 and read through stream:0', function(t) {
   t.plan(4);
 
   streams[0].once('data', function(buffer) {
-    t.ok(buffer instanceof Buffer || buffer instanceof Uint8Array, 'got a Buffer instance');
+    t.ok(Buffer.isBuffer(buffer), 'got a Buffer instance');
     t.equal(buffer.length, 2, 'got 2 length buffer');
     t.equal(buffer[0], 0xFF);
     t.equal(buffer[1], 0xAA);
