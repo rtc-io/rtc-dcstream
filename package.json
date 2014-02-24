@@ -34,6 +34,6 @@
     "stream-tester": "0.0.5"
   },
   "dependencies": {
-    "cog": "~0.4.1"
+    "cog": "~0.5.1"
   }
 }
