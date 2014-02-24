@@ -10,11 +10,65 @@ data channels.
 [![Build Status](https://travis-ci.org/rtc-io/rtc-dcstream.png?branch=master)](https://travis-ci.org/rtc-io/rtc-dcstream)
 [![unstable](http://hughsk.github.io/stability-badges/dist/unstable.svg)](http://github.com/hughsk/stability-badges)
 
-## NOTE: Work in Progress
+## Example Usage
 
-This module is currently an experimental work in progress, so I'd recommend
-checking out one of the alternative implementation of data channel -> node
-stream implementations:
+The example below shows how to use the `rtc-dcstream` module to stream data
+via a datachannel to *n* remote participants.  In this case we are using
+the W3C FileReader API and streaming dropped data files over the data
+channel:
+
+```js
+var dropkick = require('dropkick');
+var quickconnect = require('rtc-quickconnect');
+var fileReader = require('filestream/read');
+var fileReceiver = require('filestream/write');
+var createDataStream = require('rtc-dcstream');
+var channels = [];
+var peers = [];
+var inbound = {};
+
+function prepStream(dc, id) {
+  createDataStream(dc).pipe(fileReceiver(function(file, metadata) {
+    console.log('received file from: ' + id, file, metadata);
+
+    // get ready to receive another stream
+    setTimeout(function() {
+      prepStream(dc, id);
+    }, 50);
+  }));
+}
+
+quickconnect('http://rtc.io/switchboard', { room: 'filetx-test' })
+  .createDataChannel('files')
+  .on('files:open', function(dc, id) {
+    channels.push(dc);
+    peers.push(id);
+
+    prepStream(dc, id);
+  })
+  .on('peer:leave', function(id) {
+    var peerIdx = peers.indexOf(id);
+    if (peerIdx >= 0) {
+      peers.splice(peerIdx, 1);
+      channels.splice(peerIdx, 1);
+    }
+  })
+
+dropkick(document.body).on('file', function(file) {
+  channels.map(createDataStream).forEach(function(stream) {
+    fileLoader(file).pipe(stream);
+  });
+});
+
+// give the document some size so we can drag and drop stuff
+document.body.style.width = '100vw';
+document.body.style.height = '100vw';
+```
+
+## Alternative Implementations
+
+In addition to this module, the following are other modules that wrap
+WebRTC data channel communication via a node streaming interface:
 
 - [rtc-data-stream](https://github.com/kumavis/rtc-data-stream)
 
@@ -26,7 +80,7 @@ To be completed.
 
 ### Apache 2.0
 
-Copyright 2013 National ICT Australia Limited (NICTA)
+Copyright 2014 National ICT Australia Limited (NICTA)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.

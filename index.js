@@ -14,11 +14,19 @@ var ENDOFSTREAM = '::endofstream';
   implementation will cater for current data size limits in the WebRTC
   data channels.
 
-  ## NOTE: Work in Progress
+  ## Example Usage
 
-  This module is currently an experimental work in progress, so I'd recommend
-  checking out one of the alternative implementation of data channel -> node
-  stream implementations:
+  The example below shows how to use the `rtc-dcstream` module to stream data
+  via a datachannel to *n* remote participants.  In this case we are using
+  the W3C FileReader API and streaming dropped data files over the data
+  channel:
+
+  <<< examples/file-transfer.js
+
+  ## Alternative Implementations
+
+  In addition to this module, the following are other modules that wrap
+  WebRTC data channel communication via a node streaming interface:
 
   - [rtc-data-stream](https://github.com/kumavis/rtc-data-stream)
 
