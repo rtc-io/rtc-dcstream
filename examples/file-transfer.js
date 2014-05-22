@@ -20,7 +20,7 @@ function prepStream(dc, id) {
 
 quickconnect('http://rtc.io/switchboard', { room: 'filetx-test' })
   .createDataChannel('files')
-  .on('files:open', function(dc, id) {
+  .on('channel:opened:files', function(id, dc) {
     channels.push(dc);
     peers.push(id);
 
@@ -36,7 +36,7 @@ quickconnect('http://rtc.io/switchboard', { room: 'filetx-test' })
 
 dropkick(document.body).on('file', function(file) {
   channels.map(createDataStream).forEach(function(stream) {
-    fileLoader(file).pipe(stream);
+    fileReader(file).pipe(stream);
   });
 });
 
