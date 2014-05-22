@@ -7,8 +7,7 @@ data channels.
 
 [![NPM](https://nodei.co/npm/rtc-dcstream.png)](https://nodei.co/npm/rtc-dcstream/)
 
-[![Build Status](https://travis-ci.org/rtc-io/rtc-dcstream.png?branch=master)](https://travis-ci.org/rtc-io/rtc-dcstream)
-[![unstable](http://hughsk.github.io/stability-badges/dist/unstable.svg)](http://github.com/hughsk/stability-badges)
+[![Build Status](https://img.shields.io/travis/rtc-io/rtc-dcstream.svg?branch=master)](https://travis-ci.org/rtc-io/rtc-dcstream) [![unstable](https://img.shields.io/badge/stability-unstable-yellowgreen.svg)](https://github.com/badges/stability-badges) [![Dependency Status](https://david-dm.org/rtc-io/rtc-dcstream.svg)](https://david-dm.org/rtc-io/rtc-dcstream) 
 
 ## Example Usage
 
@@ -40,7 +39,7 @@ function prepStream(dc, id) {
 
 quickconnect('http://rtc.io/switchboard', { room: 'filetx-test' })
   .createDataChannel('files')
-  .on('files:open', function(dc, id) {
+  .on('channel:opened:files', function(id, dc) {
     channels.push(dc);
     peers.push(id);
 
@@ -56,13 +55,14 @@ quickconnect('http://rtc.io/switchboard', { room: 'filetx-test' })
 
 dropkick(document.body).on('file', function(file) {
   channels.map(createDataStream).forEach(function(stream) {
-    fileLoader(file).pipe(stream);
+    fileReader(file).pipe(stream);
   });
 });
 
 // give the document some size so we can drag and drop stuff
 document.body.style.width = '100vw';
 document.body.style.height = '100vw';
+
 ```
 
 ## Alternative Implementations
