@@ -122,7 +122,7 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
 
   // if closed then abort
   if (closed) {
-    return;
+    return callback(new Error('data channel is closed'));
   }
 
   // if we are connecting, then wait
@@ -148,7 +148,7 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
     }
   }
 
-  setTimeout(callback, 0);
+  return callback();
 };
 
 /* event handlers */
