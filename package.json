@@ -36,6 +36,6 @@
     "filestream": "~0.5"
   },
   "dependencies": {
-    "cog": "~0.5"
+    "cog": "^1.0.0"
   }
 }
