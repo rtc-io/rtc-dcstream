@@ -25,7 +25,7 @@
   "homepage": "https://github.com/rtc-io/rtc-dcstream",
   "devDependencies": {
     "dropkick": "~0.1",
-    "filestream": "~0.5",
+    "filestream": "^1.0.1",
     "peerpair": "^1.0.0",
     "rtc-quickconnect": "^2.2.0",
     "scuttlebutt": "^5",
