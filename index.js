@@ -135,8 +135,8 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
   }
 
   // if we have a buffer convert into a Uint8Array
-  if (chunk instanceof Buffer) {
-    this.channel.send(new Uint8Array(chunk));
+  if (Buffer.isBuffer(chunk)) {
+    this.channel.send(chunk);
   }
   // otherwise, send as is
   else {
