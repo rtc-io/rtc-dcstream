@@ -1,7 +1,7 @@
 ui: tape
 browsers:
   - name: chrome
-    version: 33..latest
+    version: 34..latest
 
   # - name: safari
   #   version: latest
@@ -10,4 +10,4 @@ browsers:
   #   version: 9..latest
 
   - name: firefox
-    version: 27..latest
+    version: 30..latest
