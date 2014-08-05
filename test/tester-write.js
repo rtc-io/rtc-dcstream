@@ -16,6 +16,12 @@ test('initialize channels', function(t) {
   });
 });
 
+test('set binary type of dc:1 to arraybuffer', function(t) {
+  t.plan(1);
+  dcs[1].binaryType = 'arraybuffer';
+  t.equal(dcs[1].binaryType, 'arraybuffer');
+});
+
 test('create a data stream on dc:0', function(t) {
   t.plan(1);
   stream = channelstream(dcs[0]);
@@ -84,11 +90,16 @@ test('push through 5000 buffer updates', function(t) {
   function checkParts() {
     var match = true;
     var view;
-    for (var ii = parts.length; match && ii--; ) {
-      match = parts[ii] instanceof ArrayBuffer;
-      if (match) {
+    var ii;
+
+    for (ii = parts.length; match && ii--; ) {
+      try {
         view = new Uint8Array(parts[ii]);
         match = view[0] === 0xFF && view[1] === 0xAA;
+      }
+      catch (e) {
+        console.error('Could not create Uint8Array from data', e);
+        match = false;
       }
     }
 
