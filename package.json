@@ -4,7 +4,7 @@
   "description": "Streams interface for the WebRTC data channel",
   "main": "index.js",
   "scripts": {
-    "test": "$(npm bin)/zuul -- test/all.js",
+    "test": "zuul -- test/all.js",
     "gendocs": "gendocs > README.md"
   },
   "repository": {
