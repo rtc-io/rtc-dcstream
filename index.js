@@ -3,6 +3,7 @@
 
 var debug = require('cog/logger')('rtc-dcstream');
 var stream = require('stream');
+var toBuffer = require('typedarray-to-buffer');
 var util = require('util');
 var closingStates = ['closing', 'closed'];
 var ENDOFSTREAM = '::endofstream';
@@ -106,7 +107,7 @@ RTCChannelStream.prototype._read = function(n) {
 
     // if the next chunk is an array buffer, convert to a node buffer
     if (next instanceof ArrayBuffer) {
-      this.push(new Buffer(new Uint8Array(next)));
+      this.push(toBuffer(new Uint8Array(next)));
     }
     else {
       this.push(next);

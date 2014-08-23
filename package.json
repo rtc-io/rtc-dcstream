@@ -36,6 +36,7 @@
     "zuul": "^1"
   },
   "dependencies": {
-    "cog": "^1.0.0"
+    "cog": "^1.0.0",
+    "typedarray-to-buffer": "^1.0.3"
   }
 }
