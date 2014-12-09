@@ -5,7 +5,29 @@ notifications:
   email:
   - damon.oehlman@nicta.com.au
   irc: irc.freenode.org#rtc.io
+
 env:
-  global:
-  - secure: ULcx4sePT4xHfjWgAFtrqnV1wD0hXqSnXKacAIAeqcGX3KzZ90I8zLFlaqq19ymUTX5GeUttkuM1npqeDgN0q/hT6U5c/Aa0V+X7vG87C4MV0jkhEuCmLX0dOnXsCVbMf8L7TeMmHfgWkBrnK8WBK70OBkgPSC4wvwVmEiNf2TI=
-  - secure: ST8HxeljXcj56NuHp/Ptw+6op7/WkrAyCXZAKlJYg3qj+y3/LX0AruPdU5TlR0wtY6NEcHoQm/u/AHp1+4RdBLXKLVzjDamelzIE8qOAr2Zvcq5TT+tJtp0n0+Dace5lxzmCjyGsU0Lz1iS1Suzm3OzwuanwsghbxW7oLHObOyQ=
+  matrix:
+    - BROWSER=chrome  BVER=stable
+    - BROWSER=chrome  BVER=beta
+    - BROWSER=chrome  BVER=unstable
+    - BROWSER=firefox BVER=stable
+    - BROWSER=firefox BVER=beta
+    - BROWSER=firefox BVER=nightly
+
+matrix:
+  fast_finish: true
+
+  allow_failures:
+    - env: BROWSER=chrome  BVER=unstable
+    - env: BROWSER=firefox BVER=nightly
+
+before_install:
+  - mkdir -p .travis
+  - curl -s https://codeload.github.com/rtc-io/webrtc-testing-on-travis/tar.gz/master | tar -xz --strip-components=1 --directory .travis
+  - ./.travis/setup.sh
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+
+after_failure:
+  - for file in *.log; do echo $file; echo "======================"; cat $file; done || true
