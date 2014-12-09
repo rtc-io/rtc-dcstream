@@ -34,7 +34,7 @@
     "scuttlebutt": "^5",
     "stream-spec": "~0.3",
     "stream-tester": "0.0.5",
-    "tape": "^2",
+    "tape": "^3.0.3",
     "through": "^2",
     "zuul": "^1"
   },
