@@ -96,6 +96,9 @@ test('push through 5000 buffer updates', function(t) {
       try {
         view = new Uint8Array(parts[ii]);
         match = view[0] === 0xFF && view[1] === 0xAA;
+        if (! match) {
+          console.log('failed at part: ' + ii, view);
+        }
       }
       catch (e) {
         console.error('Could not create Uint8Array from data', e);
@@ -107,6 +110,11 @@ test('push through 5000 buffer updates', function(t) {
   }
 
   function handleMessage(evt) {
+    // ignore ::endofstream markers from the text stream tests
+    if (evt.data === '::endofstream') {
+      return;
+    }
+
     parts[received++] = evt.data;
     if (received >= max) {
       t.pass('received ' + max + ' messages');
