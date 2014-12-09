@@ -7,7 +7,7 @@ data channels.
 
 [![NPM](https://nodei.co/npm/rtc-dcstream.png)](https://nodei.co/npm/rtc-dcstream/)
 
-[![Build Status](https://img.shields.io/travis/rtc-io/rtc-dcstream.svg?branch=master)](https://travis-ci.org/rtc-io/rtc-dcstream) [![unstable](https://img.shields.io/badge/stability-unstable-yellowgreen.svg)](https://github.com/badges/stability-badges) [![Dependency Status](https://david-dm.org/rtc-io/rtc-dcstream.svg)](https://david-dm.org/rtc-io/rtc-dcstream) 
+[![Build Status](https://img.shields.io/travis/rtc-io/rtc-dcstream.svg?branch=master)](https://travis-ci.org/rtc-io/rtc-dcstream) [![unstable](https://img.shields.io/badge/stability-unstable-yellowgreen.svg)](https://github.com/dominictarr/stability#unstable) [![Dependency Status](https://david-dm.org/rtc-io/rtc-dcstream.svg)](https://david-dm.org/rtc-io/rtc-dcstream) 
 
 ## Example Usage
 
@@ -17,33 +17,35 @@ the W3C FileReader API and streaming dropped data files over the data
 channel:
 
 ```js
+var crel = require('crel');
 var dropkick = require('dropkick');
 var quickconnect = require('rtc-quickconnect');
 var fileReader = require('filestream/read');
 var fileReceiver = require('filestream/write');
+var multiplex = require('multiplex');
 var createDataStream = require('rtc-dcstream');
 var channels = [];
 var peers = [];
 var inbound = {};
 
 function prepStream(dc, id) {
-  createDataStream(dc).pipe(fileReceiver(function(file, metadata) {
-    console.log('received file from: ' + id, file, metadata);
+  var plex = multiplex();
 
-    // get ready to receive another stream
-    setTimeout(function() {
-      prepStream(dc, id);
-    }, 50);
+  plex.pipe(createDataStream(dc)).pipe(multiplex(function(stream, id) {
+    console.log('received new stream: ' + id);
+    stream.pipe(fileReceiver(function(file) {
+      document.body.appendChild(crel('img', { src: URL.createObjectURL(file) }));
+    }));
   }));
+
+  return plex;
 }
 
 quickconnect('http://rtc.io/switchboard', { room: 'filetx-test' })
   .createDataChannel('files')
   .on('channel:opened:files', function(id, dc) {
-    channels.push(dc);
     peers.push(id);
-
-    prepStream(dc, id);
+    channels.push(prepStream(dc, id));
   })
   .on('peer:leave', function(id) {
     var peerIdx = peers.indexOf(id);
@@ -54,8 +56,8 @@ quickconnect('http://rtc.io/switchboard', { room: 'filetx-test' })
   })
 
 dropkick(document.body).on('file', function(file) {
-  channels.map(createDataStream).forEach(function(stream) {
-    fileReader(file).pipe(stream);
+  channels.forEach(function(plex) {
+    fileReader(file).pipe(plex.createStream(file.type));
   });
 });
 
