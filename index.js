@@ -80,7 +80,16 @@ function RTCChannelStream(channel) {
 module.exports = RTCChannelStream;
 util.inherits(RTCChannelStream, stream.Duplex);
 
-RTCChannelStream.prototype._debindChannel = function() {
+var prot = RTCChannelStream.prototype;
+
+prot._checkClear = function() {
+  if (this.channel.bufferedAmount === 0) {
+    clearInterval(this._clearTimer);
+    this._handleOpen();
+  }
+};
+
+prot._debindChannel = function() {
   var channel = this.channel;
 
   // remove the message listener
@@ -89,7 +98,7 @@ RTCChannelStream.prototype._debindChannel = function() {
   channel.removeEventListener('open', this._handleOpen);
 };
 
-RTCChannelStream.prototype._read = function(n) {
+prot._read = function(n) {
   var ready = true;
   var next;
 
@@ -117,7 +126,7 @@ RTCChannelStream.prototype._read = function(n) {
   return ready;
 };
 
-RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
+prot._write = function(chunk, encoding, callback) {
   var closed = (! this.channel) ||
     closingStates.indexOf(this.channel.readyState) >= 0;
 
@@ -131,8 +140,11 @@ RTCChannelStream.prototype._write = function(chunk, encoding, callback) {
     return this._wq.push([ chunk, encoding, callback ]);
   }
 
+  // if the channel is buffering, let's give it a rest
   if (this.channel.bufferedAmount > 0) {
-    debug('channel buffering: ', this.channel.bufferedAmount);
+    debug('data channel buffering ' + this.channel.bufferedAmount + ', backing off');
+    this._clearTimer = setInterval(this._checkClear.bind(this), 100);
+    return this._wq.push([ chunk, encoding, callback ]);
   }
 
   // if we have a buffer convert into a Uint8Array
