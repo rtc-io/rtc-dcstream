@@ -4,7 +4,7 @@
   "description": "Streams interface for the WebRTC data channel",
   "main": "index.js",
   "scripts": {
-    "test": "zuul -- test/all.js",
+    "test": "testling -x ./.travis/start-$BROWSER.sh",
     "gendocs": "gendocs > README.md"
   },
   "repository": {
@@ -35,11 +35,14 @@
     "stream-spec": "~0.3",
     "stream-tester": "0.0.5",
     "tape": "^3.0.3",
-    "through": "^2",
-    "zuul": "^1"
+    "testling": "^1.7.1",
+    "through": "^2"
   },
   "dependencies": {
     "cog": "^1.0.0",
     "typedarray-to-buffer": "^3.0.0"
+  },
+  "testling": {
+    "files": "test/all.js"
   }
 }
