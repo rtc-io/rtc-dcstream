@@ -37,6 +37,6 @@
   },
   "dependencies": {
     "cog": "^1.0.0",
-    "typedarray-to-buffer": "^1.0.3"
+    "typedarray-to-buffer": "^3.0.0"
   }
 }
