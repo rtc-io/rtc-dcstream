@@ -26,7 +26,7 @@
   "devDependencies": {
     "crel": "^2.1.6",
     "dropkick": "~0.1",
-    "filestream": "^2.2.0",
+    "filestream": "^3.0.2",
     "mime-component": "0.0.1",
     "multiplex": "^4.0.1",
     "peerpair": "^1.0.0",
