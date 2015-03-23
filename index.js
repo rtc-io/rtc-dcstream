@@ -61,15 +61,10 @@ function RTCChannelStream(channel) {
   // set the channel binaryType to arraybuffer
   channel.binaryType = 'arraybuffer';
 
-  // bind some local event handlers
-  this._handleClose = handleChannelClose.bind(this);
-  this._handleMessage = handleChannelMessage.bind(this);
-  this._handleOpen = handleChannelOpen.bind(this);
-
   // attach channel listeners
-  channel.addEventListener('message', this._handleMessage);
-  channel.addEventListener('close', this._handleClose);
-  channel.addEventListener('open', this._handleOpen);
+  channel.addEventListener('message', this._handleMessage.bind(this));
+  channel.addEventListener('close', this._handleClose.bind(this));
+  channel.addEventListener('open', this._handleOpen.bind(this));
 
   // send an ENDOFSTREAM marker on finish
   this.once('finish', this._dcsend.bind(this, ENDOFSTREAM));
@@ -176,16 +171,17 @@ prot._dcsend = function(chunk, encoding, callback) {
 
 /* event handlers */
 
-function handleChannelClose(evt) {
+prot._handleClose = function(evt) {
   // flag the channel as closed
   this._closed = true;
   
   // emit the close and end events
   this.emit('close');
   this.emit('end');
-}
+};
 
-function handleChannelMessage(evt) {
+prot._handleMessage = function(evt) {
+  /* jshint validthis: true */
   var data = evt && evt.data;
 
   // if we have an end of stream marker, end
@@ -199,10 +195,9 @@ function handleChannelMessage(evt) {
 
   this._rq.push(data);
   this.emit('readable');
-}
+};
 
-function handleChannelOpen(evt) {
-
+prot._handleOpen = function(evt) {
   var peer = this;
   var queue = this._wq;
 
@@ -233,4 +228,4 @@ function handleChannelOpen(evt) {
   // send the queued messages
   debug('channel open, sending queued ' + queue.length + ' messages');
   sendNext(queue.shift());
-}
+};
