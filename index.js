@@ -60,11 +60,18 @@ function RTCChannelStream(channel) {
 
   // set the channel binaryType to arraybuffer
   channel.binaryType = 'arraybuffer';
+  
+  // initialise the message handlers
+  this._handlers = {
+    message: this._handleMessage.bind(this),
+    close: this._handleClose.bind(this),
+    open: this._handleOpen.bind(this)
+  };
 
   // attach channel listeners
-  channel.addEventListener('message', this._handleMessage.bind(this));
-  channel.addEventListener('close', this._handleClose.bind(this));
-  channel.addEventListener('open', this._handleOpen.bind(this));
+  channel.addEventListener('message', this._handlers.message);
+  channel.addEventListener('close', this._handlers.close);
+  channel.addEventListener('open', this._handlers.open);
 
   // send an ENDOFSTREAM marker on finish
   this.once('finish', this._dcsend.bind(this, ENDOFSTREAM));
@@ -86,9 +93,9 @@ prot._debindChannel = function() {
   var channel = this.channel;
 
   // remove the message listener
-  channel.removeEventListener('message', this._handleMessage);
-  channel.removeEventListener('close', this._handleClose);
-  channel.removeEventListener('open', this._handleOpen);
+  channel.removeEventListener('message', this._handlers.message);
+  channel.removeEventListener('close', this._handlers.close);
+  channel.removeEventListener('open', this._handlers.message);
 };
 
 prot._read = function(n) {
