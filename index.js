@@ -169,6 +169,7 @@ prot._write = function(chunk, encoding, callback) {
 function handleChannelClose(evt) {
   debug('dc closed');
   this.emit('close');
+  this.emit('end');
 }
 
 function handleChannelMessage(evt) {
