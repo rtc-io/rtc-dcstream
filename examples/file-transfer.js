@@ -12,11 +12,10 @@ var inbound = {};
 function prepStream(dc, id) {
   var plex = multiplex();
 
-  plex.pipe(createDataStream(dc)).pipe(multiplex(function(stream, id) {
-    console.log('received new stream: ' + id);
+  plex.pipe(createDataStream(dc)).pipe(multiplex(function(stream, type) {
     stream.pipe(fileReceiver(function(file) {
       document.body.appendChild(crel('img', { src: URL.createObjectURL(file) }));
-    }));
+    }, { type: type }));
   }));
 
   return plex;
