@@ -51,6 +51,9 @@ function RTCChannelStream(channel) {
   // create the internal read and write queues
   this._rq = [];
   this._wq = [];
+  
+  // initialise the closed state
+  this._closed = channel.readyState === 'closed';
 
   // save a reference to the channel
   this.channel = channel;
@@ -156,6 +159,11 @@ prot._dcsend = function(chunk, encoding, callback) {
   // ensure we have a callback to use if not supplied
   callback = callback || function() {};
   
+  // if the channel is closed, then return false
+  if (this._closed || this.channel.readyState !== 'open') {
+    return false;
+  }
+  
   try {
     this.channel.send(chunk);
   }
@@ -169,7 +177,10 @@ prot._dcsend = function(chunk, encoding, callback) {
 /* event handlers */
 
 function handleChannelClose(evt) {
-  debug('dc closed');
+  // flag the channel as closed
+  this._closed = true;
+  
+  // emit the close and end events
   this.emit('close');
   this.emit('end');
 }
