@@ -40,14 +40,10 @@ test('write a buffer from 0 -> 1', function(t) {
 });
 
 test('close the underlying data channel and attempt to write', function(t) {
-  t.plan(3);
+  t.plan(2);
   
   dcs[0].close();
   streams[1].once('end', t.pass.bind(t, 'stream ended'));
-  streams[0].once('error', function(err) {
-    t.ok(err instanceof Error, 'got valid error');
-  });
-  
   t.doesNotThrow(function() {
     streams[0].write(new Buffer('hello'));
   });
