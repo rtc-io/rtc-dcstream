@@ -7,7 +7,7 @@ data channels.
 
 [![NPM](https://nodei.co/npm/rtc-dcstream.png)](https://nodei.co/npm/rtc-dcstream/)
 
-[![Build Status](https://img.shields.io/travis/rtc-io/rtc-dcstream.svg?branch=master)](https://travis-ci.org/rtc-io/rtc-dcstream) [![unstable](https://img.shields.io/badge/stability-unstable-yellowgreen.svg)](https://github.com/dominictarr/stability#unstable) [![Dependency Status](https://david-dm.org/rtc-io/rtc-dcstream.svg)](https://david-dm.org/rtc-io/rtc-dcstream) 
+[![unstable](https://img.shields.io/badge/stability-unstable-yellowgreen.svg)](https://github.com/dominictarr/stability#unstable) [![Build Status](https://img.shields.io/travis/rtc-io/rtc-dcstream.svg?branch=master)](https://travis-ci.org/rtc-io/rtc-dcstream) [![bitHound Score](https://www.bithound.io/github/rtc-io/rtc-dcstream/badges/score.svg)](https://www.bithound.io/github/rtc-io/rtc-dcstream) 
 
 ## Example Usage
 
@@ -31,11 +31,10 @@ var inbound = {};
 function prepStream(dc, id) {
   var plex = multiplex();
 
-  plex.pipe(createDataStream(dc)).pipe(multiplex(function(stream, id) {
-    console.log('received new stream: ' + id);
+  plex.pipe(createDataStream(dc)).pipe(multiplex(function(stream, type) {
     stream.pipe(fileReceiver(function(file) {
       document.body.appendChild(crel('img', { src: URL.createObjectURL(file) }));
-    }));
+    }, { type: type }));
   }));
 
   return plex;
@@ -82,7 +81,7 @@ To be completed.
 
 ### Apache 2.0
 
-Copyright 2014 National ICT Australia Limited (NICTA)
+Copyright 2015 National ICT Australia Limited (NICTA)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
