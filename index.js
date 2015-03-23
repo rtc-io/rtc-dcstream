@@ -190,6 +190,8 @@ prot._handleClose = function(evt) {
   // emit the close and end events
   this.emit('close');
   this.emit('end');
+
+  return false;
 };
 
 prot._handleMessage = function(evt) {
