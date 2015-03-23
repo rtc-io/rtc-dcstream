@@ -68,13 +68,8 @@ function RTCChannelStream(channel) {
   channel.addEventListener('close', this._handleClose);
   channel.addEventListener('open', this._handleOpen);
 
-  // listen for finish events on the stream
-  this.once('finish', function() {
-    // if the channel is still open send an EOF message
-    if (channel.readyState === 'open') {
-      channel.send(ENDOFSTREAM);
-    }
-  });
+  // send an ENDOFSTREAM marker on finish
+  this.once('finish', this._dcsend.bind(this, ENDOFSTREAM));
 }
 
 module.exports = RTCChannelStream;
@@ -146,6 +141,20 @@ prot._write = function(chunk, encoding, callback) {
     this._clearTimer = setInterval(this._checkClear.bind(this), 100);
     return this._wq.push([ chunk, encoding, callback ]);
   }
+  
+  return this._dcsend(chunk, encoding, callback);
+};
+
+/**
+  ### `_dcsend(chunk, encoding, callback)`
+
+  The internal function that is responsible for sending the data over the
+  underlying datachannel.
+
+**/
+prot._dcsend = function(chunk, encoding, callback) {
+  // ensure we have a callback to use if not supplied
+  callback = callback || function() {};
   
   try {
     this.channel.send(chunk);
