@@ -146,19 +146,12 @@ prot._write = function(chunk, encoding, callback) {
     this._clearTimer = setInterval(this._checkClear.bind(this), 100);
     return this._wq.push([ chunk, encoding, callback ]);
   }
-
-  // if we have a buffer convert into a Uint8Array
-  if (Buffer.isBuffer(chunk)) {
+  
+  try {
     this.channel.send(chunk);
   }
-  // otherwise, send as is
-  else {
-    try {
-      this.channel.send(chunk);
-    }
-    catch (e) {
-      debug('error sending text: ', e);
-    }
+  catch (e) {
+    return callback(e);
   }
 
   return callback();
