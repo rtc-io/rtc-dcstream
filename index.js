@@ -132,7 +132,7 @@ prot._write = function(chunk, encoding, callback) {
 
   // if closed then abort
   if (closed) {
-    return callback(new Error('data channel is closed'));
+    return false;
   }
 
   // if we are connecting, then wait
