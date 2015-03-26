@@ -5,7 +5,7 @@
   "main": "index.js",
   "stability": "unstable",
   "scripts": {
-    "test": "testling -x ./.travis/start-$BROWSER.sh",
+    "test": "testling -x start-$BROWSER",
     "gendocs": "gendocs > README.md"
   },
   "repository": {
@@ -37,7 +37,8 @@
     "stream-tester": "0.0.5",
     "tape": "^3.0.3",
     "testling": "^1.7.1",
-    "through": "^2"
+    "through": "^2",
+    "travis-multirunner": "^2.0.9"
   },
   "dependencies": {
     "cog": "^1.0.0",
