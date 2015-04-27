@@ -35,7 +35,7 @@
     "scuttlebutt": "^5",
     "stream-spec": "~0.3",
     "stream-tester": "0.0.5",
-    "tape": "^3.0.3",
+    "tape": "^4.0.0",
     "testling": "^1.7.1",
     "through": "^2",
     "travis-multirunner": "^2.0.9"
