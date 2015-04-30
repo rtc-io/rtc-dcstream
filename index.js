@@ -44,14 +44,17 @@ function RTCChannelStream(channel) {
 
   // super
   stream.Duplex.call(this, {
-    decodeStrings: false,
-    objectMode: true
+    allowHalfOpen: false,
+    highWaterMark: 1024 * 1024,
+    decodeStrings: false
   });
+
+  console.log('created new dcstream');
 
   // create the internal read and write queues
   this._rq = [];
   this._wq = [];
-  
+
   // initialise the closed state
   this._closed = channel.readyState === 'closed';
 
@@ -60,7 +63,7 @@ function RTCChannelStream(channel) {
 
   // set the channel binaryType to arraybuffer
   channel.binaryType = 'arraybuffer';
-  
+
   // initialise the message handlers
   this._handlers = {
     message: this._handleMessage.bind(this),
@@ -130,6 +133,8 @@ prot._write = function(chunk, encoding, callback) {
   var closed = (! this.channel) ||
     closingStates.indexOf(this.channel.readyState) >= 0;
 
+  console.log('attempting write');
+
   // if closed then abort
   if (closed) {
     return false;
@@ -142,11 +147,11 @@ prot._write = function(chunk, encoding, callback) {
 
   // if the channel is buffering, let's give it a rest
   if (this.channel.bufferedAmount > 0) {
-    debug('data channel buffering ' + this.channel.bufferedAmount + ', backing off');
+    console.log('data channel buffering ' + this.channel.bufferedAmount + ', backing off');
     this._clearTimer = setInterval(this._checkClear.bind(this), 100);
     return this._wq.push([ chunk, encoding, callback ]);
   }
-  
+
   return this._dcsend(chunk, encoding, callback);
 };
 
@@ -160,21 +165,24 @@ prot._write = function(chunk, encoding, callback) {
 prot._dcsend = function(chunk, encoding, callback) {
   // ensure we have a callback to use if not supplied
   callback = callback || function() {};
-  
+
   // if the channel is closed, then return false
   if (this._closed || this.channel.readyState !== 'open') {
     return false;
   }
-  
+
   try {
+    console.log('sending chunk: ', chunk);
     this.channel.send(chunk);
   }
   catch (e) {
+    console.log('captured error writing data: ', e);
+
     // handle closed streams where we didn't get the memo
     if (e.name == 'NetworkError') {
       return this._handleClose();
     }
-    
+
     return callback(e);
   }
 
@@ -186,7 +194,7 @@ prot._dcsend = function(chunk, encoding, callback) {
 prot._handleClose = function(evt) {
   // flag the channel as closed
   this._closed = true;
-  
+
   // emit the close and end events
   this.emit('close');
   this.emit('end');
