@@ -69,9 +69,9 @@ function RTCChannelStream(channel) {
   };
 
   // attach channel listeners
-  channel.addEventListener('message', this._handlers.message);
-  channel.addEventListener('close', this._handlers.close);
-  channel.addEventListener('open', this._handlers.open);
+  channel.onmessage = this._handlers.message;
+  channel.onclose = this._handlers.close;
+  channel.onopen = this._handlers.open;
 
   // send an ENDOFSTREAM marker on finish
   this.once('finish', this._dcsend.bind(this, ENDOFSTREAM));
