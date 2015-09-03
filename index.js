@@ -69,9 +69,15 @@ function RTCChannelStream(channel) {
   };
 
   // attach channel listeners
-  channel.onmessage = this._handlers.message;
-  channel.onclose = this._handlers.close;
-  channel.onopen = this._handlers.open;
+  if (typeof channel.addEventListener == 'function') {
+    channel.addEventListener('message', this._handlers.message);
+    channel.addEventListener('close', this._handlers.close);
+    channel.addEventListener('open', this._handlers.open);
+  } else {
+    channel.onmessage = this._handlers.message;
+    channel.onclose = this._handlers.close;
+    channel.onopen = this._handlers.open;
+  }
 
   // send an ENDOFSTREAM marker on finish
   this.once('finish', this._dcsend.bind(this, ENDOFSTREAM));
@@ -93,9 +99,15 @@ prot._debindChannel = function() {
   var channel = this.channel;
 
   // remove the message listener
-  channel.removeEventListener('message', this._handlers.message);
-  channel.removeEventListener('close', this._handlers.close);
-  channel.removeEventListener('open', this._handlers.message);
+  if (typeof channel.removeEventListener == 'function') {
+    channel.removeEventListener('message', this._handlers.message);
+    channel.removeEventListener('close', this._handlers.close);
+    channel.removeEventListener('open', this._handlers.message);
+  } else {
+    channel.onmessage = null;
+    channel.onclose = null;
+    channel.onopen = null;
+  }
 };
 
 prot._read = function(n) {
