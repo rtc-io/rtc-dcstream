@@ -51,7 +51,7 @@ function RTCChannelStream(channel) {
   // create the internal read and write queues
   this._rq = [];
   this._wq = [];
-  
+
   // initialise the closed state
   this._closed = channel.readyState === 'closed';
 
@@ -60,7 +60,7 @@ function RTCChannelStream(channel) {
 
   // set the channel binaryType to arraybuffer
   channel.binaryType = 'arraybuffer';
-  
+
   // initialise the message handlers
   this._handlers = {
     message: this._handleMessage.bind(this),
@@ -77,6 +77,11 @@ function RTCChannelStream(channel) {
     channel.onmessage = this._handlers.message;
     channel.onclose = this._handlers.close;
     channel.onopen = this._handlers.open;
+  }
+
+  // Check if the channel is already open, and if it is, fire the open handler
+  if (channel.readyState === 'open') {
+    this._handlers.open();
   }
 
   // send an ENDOFSTREAM marker on finish
@@ -158,7 +163,7 @@ prot._write = function(chunk, encoding, callback) {
     this._clearTimer = setInterval(this._checkClear.bind(this), 100);
     return this._wq.push([ chunk, encoding, callback ]);
   }
-  
+
   return this._dcsend(chunk, encoding, callback);
 };
 
@@ -172,12 +177,12 @@ prot._write = function(chunk, encoding, callback) {
 prot._dcsend = function(chunk, encoding, callback) {
   // ensure we have a callback to use if not supplied
   callback = callback || function() {};
-  
+
   // if the channel is closed, then return false
   if (this._closed || this.channel.readyState !== 'open') {
     return false;
   }
-  
+
   try {
     this.channel.send(chunk);
   }
@@ -186,7 +191,7 @@ prot._dcsend = function(chunk, encoding, callback) {
     if (e.name == 'NetworkError') {
       return this._handleClose();
     }
-    
+
     return callback(e);
   }
 
@@ -198,7 +203,7 @@ prot._dcsend = function(chunk, encoding, callback) {
 prot._handleClose = function(evt) {
   // flag the channel as closed
   this._closed = true;
-  
+
   // emit the close and end events
   this.emit('close');
   this.emit('end');
