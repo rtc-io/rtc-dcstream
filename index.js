@@ -37,10 +37,12 @@ var ENDOFSTREAM = '::endofstream';
 
 **/
 
-function RTCChannelStream(channel) {
+function RTCChannelStream(channel, opts) {
   if (! (this instanceof RTCChannelStream)) {
-    return new RTCChannelStream(channel);
+    return new RTCChannelStream(channel, opts);
   }
+
+  opts = opts || {};
 
   // super
   stream.Duplex.call(this, {
@@ -51,6 +53,7 @@ function RTCChannelStream(channel) {
   // create the internal read and write queues
   this._rq = [];
   this._wq = [];
+  this._compatibilityMode = opts.compatibilityMode;
 
   // initialise the closed state
   this._closed = channel.readyState === 'closed';
@@ -174,6 +177,9 @@ prot._write = function(chunk, encoding, callback) {
   underlying datachannel.
 
 **/
+var binaryMarker = '#>|';
+var compatibiltyValue = String.fromCharCode(255);
+
 prot._dcsend = function(chunk, encoding, callback) {
   // ensure we have a callback to use if not supplied
   callback = callback || function() {};
@@ -184,6 +190,20 @@ prot._dcsend = function(chunk, encoding, callback) {
   }
 
   try {
+    // Compatibility mode is to try and make things work with the Temasys data
+    // channel implementation, which has... some limitations
+    if (this._compatibilityMode && typeof chunk !== 'string') {
+      var value = String.fromCharCode.apply(null, chunk);
+      // Like the fact that it seems to be using truthiness to check to see if it should value,
+      // so if the first byte has a value of 0x00 it doesn't send the chunk, which is terrible, as
+      // 0 is still a valid value by any yardstick.
+      // So the following code is absolutely, ridiculously bad by any standard that you could ever
+      // hope to find. Replacing 0x00 with 0xFF? Gah!
+      if (chunk.length > 0 && chunk[0] === 0x00) {
+        value = compatibiltyValue + String.fromCharCode.apply(null, chunk.slice(1));
+      }
+      chunk = binaryMarker + value;
+    };
     this.channel.send(chunk);
   }
   catch (e) {
@@ -212,8 +232,22 @@ prot._handleClose = function(evt) {
 };
 
 prot._handleMessage = function(evt) {
+  console.log('handle message', evt, evt && evt.data);
   /* jshint validthis: true */
   var data = evt && evt.data;
+  if (this._compatibilityMode && data && typeof data == 'string' && data.substring(0, binaryMarker.length) === binaryMarker) {
+    var contents = data.substring(binaryMarker.length);
+    var buf = new ArrayBuffer(contents.length);
+    var bufView = new Uint8Array(buf);
+    for (var i=0, strLen=contents.length; i<strLen; i++) {
+      bufView[i] = contents.charCodeAt(i);
+      // TODO: Freaking Temasys, this is hacky as all ...
+      if (i === 0 && bufView[i] === 255) {
+        bufView[i] = 0;
+      }
+    }
+    data = buf;
+  }
 
   // if we have an end of stream marker, end
   if (typeof data == 'string' && data === ENDOFSTREAM) {
