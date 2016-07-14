@@ -5,7 +5,7 @@
   "main": "index.js",
   "stability": "unstable",
   "scripts": {
-    "test": "testling -x start-$BROWSER",
+    "test": "browserify test/all.js | broth start | tap-spec",
     "gendocs": "gendocs > README.md"
   },
   "repository": {
@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/rtc-io/rtc-dcstream",
   "devDependencies": {
+    "broth": "^2.0.0",
+    "browserify": "^9.0.3",
     "crel": "^2.1.6",
     "dropkick": "~0.1",
     "filestream": "^3.0.2",
@@ -35,10 +37,10 @@
     "scuttlebutt": "^5",
     "stream-spec": "~0.3",
     "stream-tester": "0.0.5",
+    "tap-spec": "^3.0.0",
     "tape": "^3.0.3",
-    "testling": "^1.7.1",
     "through": "^2",
-    "travis-multirunner": "^2.0.9"
+    "travis-multirunner": "^3.0.0"
   },
   "dependencies": {
     "cog": "^1.0.0",
