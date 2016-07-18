@@ -221,6 +221,10 @@ prot._dcsend = function(chunk, encoding, callback) {
     this.channel.send(chunk);
   }
   catch (e) {
+    // handle closed streams where we didn't get the memo
+    if (e.name == 'NetworkError') {
+      return this._handleClose();
+    }
     return callback(e);
   }
 
