@@ -7,6 +7,7 @@ var toBuffer = require('typedarray-to-buffer');
 var util = require('util');
 var closingStates = ['closing', 'closed'];
 var ENDOFSTREAM = '::endofstream';
+var MAX_CHUNK_SIZE = 1024 * 64;
 
 /**
   # rtc-dcstream
@@ -96,8 +97,14 @@ var prot = RTCChannelStream.prototype;
 prot._checkClear = function() {
   if (this.channel.bufferedAmount === 0) {
     clearInterval(this._clearTimer);
+    this._clearTimer = undefined;
     this._handleOpen();
   }
+};
+
+prot._ensureClearCheck = function() {
+  if (this._clearTimer) return;
+  this._clearTimer = setInterval(this._checkClear.bind(this), 100);
 };
 
 prot._debindChannel = function() {
@@ -152,19 +159,46 @@ prot._write = function(chunk, encoding, callback) {
     return false;
   }
 
-  // if we are connecting, then wait
-  if (this._wq.length || this.channel.readyState === 'connecting') {
-    return this._wq.push([ chunk, encoding, callback ]);
+  // process in chunks of an appropriate size for the data channel
+  var length = chunk.length || chunk.byteLength || chunk.size;
+  var numChunks = Math.ceil(length / MAX_CHUNK_SIZE);
+  var _returned = false;
+  debug('_write ' + length + ' in ' + numChunks + ' chunks');
+
+  function progressiveCallback(e) {
+    if (_returned || !e) return;
+    // Capture errors for writes that are split into multiple chunks and
+    // return to the root callback
+    _returned = true;
+    return callback(e);
   }
 
-  // if the channel is buffering, let's give it a rest
-  if (this.channel.bufferedAmount > 0) {
-    debug('data channel buffering ' + this.channel.bufferedAmount + ', backing off');
-    this._clearTimer = setInterval(this._checkClear.bind(this), 100);
-    return this._wq.push([ chunk, encoding, callback ]);
-  }
+  var result;
+  // To prevent overwhelming the data channel with a large write
+  // we ensure that writes are only for chunks within the MAX_CHUNK_SIZE
+  // If not, we split it up further into smaller chunks
+  for (var i = 0; i < numChunks; i++) {
+    var offset = i * MAX_CHUNK_SIZE;
+    var until = offset + MAX_CHUNK_SIZE;
+    var currentChunk = (numChunks === 1 ? chunk : chunk.slice(offset, until));
+    var ccLength = currentChunk.length || currentChunk.byteLength || currentChunk.size;
 
-  return this._dcsend(chunk, encoding, callback);
+    // Only callback after the entire attempted chunk is written
+    var currentCallback = (i + 1 === numChunks) ? callback : progressiveCallback;
+    // if we are connecting, then wait
+    if (this._wq.length || this.channel.readyState === 'connecting') {
+      result = this._wq.push([ currentChunk, encoding, currentCallback ]);
+    }
+    // if the channel is buffering, let's give it a rest
+    else if (this.channel.bufferedAmount > 0) {
+      debug('data channel buffering ' + this.channel.bufferedAmount + ', backing off');
+      this._ensureClearCheck();
+      result = this._wq.push([ currentChunk, encoding, currentCallback ]);
+    } else {
+      result = this._dcsend(currentChunk, encoding, currentCallback);
+    }
+  }
+  return result;
 };
 
 /**
@@ -191,7 +225,6 @@ prot._dcsend = function(chunk, encoding, callback) {
     if (e.name == 'NetworkError') {
       return this._handleClose();
     }
-
     return callback(e);
   }
 
@@ -232,12 +265,20 @@ prot._handleOpen = function(evt) {
   var peer = this;
   var queue = this._wq;
 
-  function sendNext(args) {
+  function sendNext() {
+
+    // Check that we are ready to send, if not, restart the timer
+    if (peer.channel.readyState !== 'open' || peer.channel.bufferedAmount > 0) {
+      debug('Not yet ready to resume sending queued write, backing off');
+      return peer._ensureClearCheck();
+    }
+
+    var args = queue.shift();
     var callback;
 
     // if we have no args, then abort
     if (! args) {
-      return queue.length ? sendNext(queue.shift()) : null;
+      return queue.length ? sendNext() : null;
     }
 
     // save the callback
@@ -245,7 +286,9 @@ prot._handleOpen = function(evt) {
 
     // replace with a new callback
     args[2] = function() {
-      sendNext(queue.shift());
+
+      // Queue up the next clearing of the queue
+      setTimeout(sendNext, 0);
 
       // trigger the callback
       if (typeof callback == 'function') {
@@ -253,10 +296,10 @@ prot._handleOpen = function(evt) {
       }
     };
 
-    peer._write.apply(peer, args);
+    peer._dcsend.apply(peer, args);
   }
 
   // send the queued messages
   debug('channel open, sending queued ' + queue.length + ' messages');
-  sendNext(queue.shift());
+  sendNext();
 };
