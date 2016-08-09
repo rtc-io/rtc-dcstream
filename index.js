@@ -163,7 +163,7 @@ prot._write = function(chunk, encoding, callback) {
   var length = chunk.length || chunk.byteLength || chunk.size;
   var numChunks = Math.ceil(length / MAX_CHUNK_SIZE);
   var _returned = false;
-  debug('_write ' + length + ' in ' + numChunks + ' chunks');
+  // debug('_write ' + length + ' in ' + numChunks + ' chunks');
 
   function progressiveCallback(e) {
     if (_returned || !e) return;
