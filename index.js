@@ -95,10 +95,18 @@ util.inherits(RTCChannelStream, stream.Duplex);
 var prot = RTCChannelStream.prototype;
 
 prot._checkClear = function() {
+  var peer = this;
   if (this.channel.bufferedAmount === 0) {
     clearInterval(this._clearTimer);
     this._clearTimer = undefined;
     this._handleOpen();
+  }
+  // Detect any errors with the data channel whereby it just
+  // stops writing and the buffer never clears
+  else if (!this._bufferWriteTimer) {
+    this._bufferWriteTimer = setTimeout(function() {
+      peer.emit('error', new Error('Buffer failed to write'));
+    }, 10000);
   }
 };
 
@@ -120,6 +128,10 @@ prot._debindChannel = function() {
     channel.onclose = null;
     channel.onopen = null;
   }
+};
+
+prot._isChannelClosed = function() {
+  return (! this.channel) || closingStates.indexOf(this.channel.readyState) >= 0;
 };
 
 prot._read = function(n) {
@@ -151,8 +163,7 @@ prot._read = function(n) {
 };
 
 prot._write = function(chunk, encoding, callback) {
-  var closed = (! this.channel) ||
-    closingStates.indexOf(this.channel.readyState) >= 0;
+  var closed = this._isChannelClosed();
 
   // if closed then abort
   if (closed) {
@@ -265,7 +276,18 @@ prot._handleOpen = function(evt) {
   var peer = this;
   var queue = this._wq;
 
+  if (peer._bufferWriteTimer) {
+    clearTimeout(peer._bufferWriteTimer);
+    peer._bufferWriteTimer = undefined;
+  }
+
   function sendNext() {
+    // Check if the channel is closed in which case, cancel the attempt to send
+    if (peer._isChannelClosed()) {
+      debug('Channel has closed, queued writes are being discarded');
+      queue = [];
+      return;
+    }
 
     // Check that we are ready to send, if not, restart the timer
     if (peer.channel.readyState !== 'open' || peer.channel.bufferedAmount > 0) {
