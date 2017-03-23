@@ -1,6 +1,6 @@
 {
   "name": "rtc-dcstream",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Streams interface for the WebRTC data channel",
   "main": "index.js",
   "stability": "unstable",
