@@ -53,6 +53,8 @@ function RTCChannelStream(channel) {
   this._rq = [];
   this._wq = [];
 
+  this._bytesWritten = 0;
+
   // initialise the closed state
   this._closed = channel.readyState === 'closed';
 
@@ -96,7 +98,10 @@ var prot = RTCChannelStream.prototype;
 
 prot._checkClear = function() {
   var peer = this;
-  if (this.channel.bufferedAmount === 0) {
+  var bufferedAmount = this.channel.bufferedAmount;
+  var bytesWritten = this._bytesWritten;
+
+  if (bufferedAmount === 0) {
     clearInterval(this._clearTimer);
     this._clearTimer = undefined;
     this._handleOpen();
@@ -105,7 +110,14 @@ prot._checkClear = function() {
   // stops writing and the buffer never clears
   else if (!this._bufferWriteTimer) {
     this._bufferWriteTimer = setTimeout(function() {
-      peer.emit('error', new Error('Buffer failed to write'));
+      // Check if our buffer is empty now
+      var currentBuffer = peer.channel.bufferedAmount;
+      if (currentBuffer === 0) return peer._checkClear();
+
+      // Raise an exception
+      var err = new Error('Buffer write timer failed. State at start: [Buffered] ' + bufferedAmount + ', [Written] ' + bytesWritten + '. State now: [Buffered] ' + peer.channel.bufferedAmount + ', [Written] ' + peer._bytesWritten);
+      err.name = 'BufferWriteError';
+      peer.emit('error', err);
     }, 10000);
   }
 };
@@ -220,6 +232,7 @@ prot._write = function(chunk, encoding, callback) {
 
 **/
 prot._dcsend = function(chunk, encoding, callback) {
+  this._clearBufferWriteTimer();  
   // ensure we have a callback to use if not supplied
   callback = callback || function() {};
 
@@ -227,6 +240,8 @@ prot._dcsend = function(chunk, encoding, callback) {
   if (this._closed || this.channel.readyState !== 'open') {
     return false;
   }
+
+  var size = chunk.length || chunk.byteLength || chunk.size || 0;
 
   try {
     this.channel.send(chunk);
@@ -239,6 +254,7 @@ prot._dcsend = function(chunk, encoding, callback) {
     return callback(e);
   }
 
+  this._bytesWritten += size;
   return callback();
 };
 
@@ -272,14 +288,18 @@ prot._handleMessage = function(evt) {
   this.emit('readable');
 };
 
+prot._clearBufferWriteTimer = function() {
+  if (!this._bufferWriteTimer) return;
+  clearTimeout(this._bufferWriteTimer);
+  this._bufferWriteTimer = undefined;
+}
+
 prot._handleOpen = function(evt) {
   var peer = this;
   var queue = this._wq;
 
-  if (peer._bufferWriteTimer) {
-    clearTimeout(peer._bufferWriteTimer);
-    peer._bufferWriteTimer = undefined;
-  }
+  // If the buffer write timer was active, we can now clear it
+  this._clearBufferWriteTimer();
 
   function sendNext() {
     // Check if the channel is closed in which case, cancel the attempt to send
