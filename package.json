@@ -40,7 +40,7 @@
     "tap-spec": "^3.0.0",
     "tape": "^3.0.3",
     "through": "^2",
-    "travis-multirunner": "^3.0.0"
+    "travis-multirunner": "^4.3.1",
   },
   "dependencies": {
     "cog": "^1.0.0",
